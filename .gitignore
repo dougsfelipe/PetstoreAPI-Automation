@@ -1,0 +1,41 @@
+# Compilação e build
+/build/
+/out/
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-app.setting
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.sw?
+
+# Arquivos temporários e caches
+*.log
+*.tmp
+*.class
+*.war
+*.ear
+*.jar
+
+# Testes
+/test-results/
+/test-output/
+/surefire-reports/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Relatórios
+/reports/
+/jacoco.exec
+
+# Ambiente local
+.env
+*.local

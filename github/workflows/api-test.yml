@@ -1,0 +1,34 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+
+      - name: ☕ Instalar Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 📦 Conceder permissão ao wrapper
+        run: chmod +x ./gradlew
+
+      - name: 🧪 Executar testes
+        run: ./gradlew test
+
+      - name: 📤 Publicar resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: relatorio-testes
+          path: build/test-results/test
