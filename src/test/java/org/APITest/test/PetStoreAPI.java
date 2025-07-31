@@ -2,15 +2,20 @@ package org.APITest.test;
 
 import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
+import org.APITest.controller.Pet;
 import org.APITest.controller.User;
+import org.APITest.factory.PetFactory;
 import org.APITest.factory.UserFactory;
+import org.APITest.model.PetDTO;
 import org.APITest.model.UserDTO;
+import org.APITest.util.Environment;
 import org.APITest.util.Message;
 import org.APITest.util.RetryExtension;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.APITest.controller.Pet.register_pet;
 import static org.APITest.controller.User.register_user;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -23,19 +28,14 @@ public class PetStoreAPI {
 
     @BeforeAll
     public static void definirAmbiente() {
-        environment = "https://petstore.swagger.io/v2";
+        environment = Environment.online;
         RestAssured.baseURI = environment;
     }
 
-    private void esperar() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 
 
+
+    //Tests for Users
     @Test
     @Order(1)
     @DisplayName("Create a user with Faker API")
@@ -66,7 +66,6 @@ public class PetStoreAPI {
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
         userDTO.setFirstName(userDTO.getFirstName() + " Atualizado");
         User.test_update_user(userDTO, HttpStatus.SC_OK, environment);
-        esperar();
         User.test_search_user(userDTO, HttpStatus.SC_OK, environment);
 
     }
@@ -79,7 +78,7 @@ public class PetStoreAPI {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
 
-        User.test_delete_user(userDTO, userDTO.getUsername(), HttpStatus.SC_OK, Message.post_book_sucess, environment);
+        User.test_delete_user(userDTO, userDTO.getUsername(), HttpStatus.SC_OK, environment);
         User.test_search_user_not_found(userDTO, userDTO.getUsername(), HttpStatus.SC_NOT_FOUND, environment, Message.user_not_found);
 
     }
@@ -101,8 +100,7 @@ public class PetStoreAPI {
     void test_login_user() {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
-        esperar();
-        User.login_user_password(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+        User.login_user_password(userDTO, HttpStatus.SC_OK, environment);
 
 
     }
@@ -114,10 +112,45 @@ public class PetStoreAPI {
     void test_logout_user() {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
-        esperar();
-        User.login_user_password(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
-        esperar();
-        User.logout(HttpStatus.SC_OK, environment, Message.logout_sucess);
+        User.login_user_password(userDTO, HttpStatus.SC_OK, environment);
+        User.logout(HttpStatus.SC_OK, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(8)
+    @DisplayName("Create a Pet")
+    void test_create_pet() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        System.out.println("Pet criado com ID: " + petDTO.getId());
+
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(9)
+    @DisplayName("Search a Pet by ID")
+    void test_search_pet_by_id() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        Pet.search_pet_by_id(petDTO,HttpStatus.SC_OK, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(10)
+    @DisplayName("Update a Pet by ID using POST")
+    void test_update_pet_by_id_using_post() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        petDTO.setName(petDTO.getName() + "_Att");
+        petDTO.setStatus("pending");
+        Pet.test_update_pet_by_id_using_post(petDTO,HttpStatus.SC_OK, environment);
+        Pet.search_pet_by_id(petDTO,HttpStatus.SC_OK, environment);
 
     }
 

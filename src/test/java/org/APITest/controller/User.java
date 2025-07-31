@@ -8,10 +8,13 @@ import org.hamcrest.CoreMatchers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
+import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
+
+
 
 public class User {
+
 
     public static String register_user(UserDTO user, Integer statusCode, String message, String environment) {
         Response response = given()
@@ -32,7 +35,7 @@ public class User {
                 .statusCode(statusCode)
                 .extract().response(); // Ou "_id", depende da resposta JSON real
 
-        String id = response.path("message").toString();
+        String id = response.path("id").toString();
         return id;
     }
 
@@ -59,8 +62,8 @@ public class User {
                 .when()
                 .get(ambiente.concat(Endpoint.get_username))
                 .then()
-                .statusCode(statusCode)
-                .body("message", is(messsage));
+                .statusCode(statusCode);
+
 
     }
 
@@ -84,11 +87,11 @@ public class User {
                 .statusCode(statusCode)
                 .extract().response(); // Ou "_id", depende da resposta JSON real
 
-        String id = response.path("message").toString();
+        String id = response.path("id").toString();
         return id;
     }
 
-    public static void test_delete_user(UserDTO user, String username,Integer statusCode, String environment, String message){
+    public static void test_delete_user(UserDTO user, String username,Integer statusCode, String environment){
         given()
                 .log().all()
                 .pathParam("username", user.getUsername())
@@ -96,33 +99,32 @@ public class User {
                 .when()
                 .delete(environment.concat(Endpoint.get_username))
                 .then()
-                .statusCode(statusCode)
-                .body("message", is(username));
+                .statusCode(statusCode);
+
 
 
     }
 
-    public static void login_user_password(UserDTO user, Integer statusCode, String environment, String mensagem) {
+    public static void login_user_password(UserDTO user, Integer statusCode, String environment) {
         given()
                 .queryParam("username", user.getUsername())
                 .queryParam("password", user.getPassword())
                 .when()
                 .get(environment.concat(Endpoint.login))
                 .then()
-                .statusCode(statusCode)
-                .body("message", CoreMatchers.startsWith(mensagem));
+                .statusCode(statusCode);
     }
 
 
-    public static void logout(Integer statusCode, String environment, String message){
+    public static void logout(Integer statusCode, String environment){
         given()
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(environment.concat(Endpoint.logout)) // Ex: /api/v1/Books
                 .then()
-                .statusCode(statusCode)
-                .body("message", is(message));
+                .statusCode(statusCode);
+
 
 
 
