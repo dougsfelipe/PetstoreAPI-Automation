@@ -4,7 +4,7 @@ public class Message {
     public static final String post_book_sucess = "";
     public static final String login_sucess = "logged in user session:";
     public static final String logout_sucess = "ok";
-    public static final String excluidoSucesso = "Registro excluído com sucesso";
+    public static final String user_not_found = "User not found";
     public static final String produtoCadastrado = "Cadastro realizado com sucesso";
     public static final String emailUtilizado = "Este email já está sendo usado";
     public static final String nenhumRegistroExcluido = "Nenhum registro excluído";

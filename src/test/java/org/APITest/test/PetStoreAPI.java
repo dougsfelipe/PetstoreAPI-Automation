@@ -2,7 +2,6 @@ package org.APITest.test;
 
 import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import org.APITest.controller.User;
 import org.APITest.factory.UserFactory;
 import org.APITest.model.UserDTO;
@@ -12,11 +11,6 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
 import static org.APITest.controller.User.register_user;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -31,6 +25,14 @@ public class PetStoreAPI {
     public static void definirAmbiente() {
         environment = "https://petstore.swagger.io/v2";
         RestAssured.baseURI = environment;
+    }
+
+    private void esperar() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 
@@ -53,8 +55,6 @@ public class PetStoreAPI {
         System.out.println("User criado com ID: " + userDTO.getId());
         User.test_search_user(userDTO, HttpStatus.SC_OK, environment);
 
-
-
     }
 
     @ExtendWith(RetryExtension.class)
@@ -66,7 +66,7 @@ public class PetStoreAPI {
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
         userDTO.setFirstName(userDTO.getFirstName() + " Atualizado");
         User.test_update_user(userDTO, HttpStatus.SC_OK, environment);
-
+        esperar();
         User.test_search_user(userDTO, HttpStatus.SC_OK, environment);
 
     }
@@ -76,7 +76,11 @@ public class PetStoreAPI {
     @Order(4)
     @DisplayName("Delete User by Username")
     void test_delete_user() {
+        UserDTO userDTO = UserFactory.createUser();
+        userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
 
+        User.test_delete_user(userDTO, userDTO.getUsername(), HttpStatus.SC_OK, Message.post_book_sucess, environment);
+        User.test_search_user_not_found(userDTO, userDTO.getUsername(), HttpStatus.SC_NOT_FOUND, environment, Message.user_not_found);
 
     }
 
@@ -85,7 +89,8 @@ public class PetStoreAPI {
     @Order(5)
     @DisplayName("Search for a non existent user")
     void test_search_for_non_existent_user() {
-
+        UserDTO userDTO = UserFactory.createUser();
+        User.test_search_user_not_found(userDTO, userDTO.getUsername() + "non_existent", HttpStatus.SC_NOT_FOUND, environment, Message.user_not_found);
 
     }
 
@@ -96,8 +101,8 @@ public class PetStoreAPI {
     void test_login_user() {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
-
-        User.login_user(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+        esperar();
+        User.login_user_password(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
 
 
     }
@@ -109,8 +114,9 @@ public class PetStoreAPI {
     void test_logout_user() {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
-
-        User.login_user(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+        esperar();
+        User.login_user_password(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+        esperar();
         User.logout(HttpStatus.SC_OK, environment, Message.logout_sucess);
 
     }

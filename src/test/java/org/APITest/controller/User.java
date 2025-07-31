@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.APITest.model.UserDTO;
 import org.APITest.util.Endpoint;
+import org.hamcrest.CoreMatchers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static io.restassured.RestAssured.given;
@@ -52,6 +53,17 @@ public class User {
 
     }
 
+    public static void test_search_user_not_found(UserDTO user, String username, Integer statusCode, String ambiente, String messsage){
+        given()
+                .pathParam("username", username)
+                .when()
+                .get(ambiente.concat(Endpoint.get_username))
+                .then()
+                .statusCode(statusCode)
+                .body("message", is(messsage));
+
+    }
+
     public static String test_update_user(UserDTO user, Integer statusCode, String environment){
         Response response = given()
                 .body("{\n" +
@@ -76,20 +88,29 @@ public class User {
         return id;
     }
 
-    public static void login_user(UserDTO user, Integer statusCode, String environment, String mensagem){
-         given()
-                .queryParam("username", user.getUsername())
-                .queryParam("password", user.getPassword())
+    public static void test_delete_user(UserDTO user, String username,Integer statusCode, String environment, String message){
+        given()
                 .log().all()
+                .pathParam("username", user.getUsername())
                 .contentType(ContentType.JSON)
                 .when()
-                .get(environment.concat(Endpoint.login)) // Ex: /api/v1/Books
+                .delete(environment.concat(Endpoint.get_username))
                 .then()
                 .statusCode(statusCode)
-                 .body("message", startsWith(mensagem));
+                .body("message", is(username));
 
 
+    }
 
+    public static void login_user_password(UserDTO user, Integer statusCode, String environment, String mensagem) {
+        given()
+                .queryParam("username", user.getUsername())
+                .queryParam("password", user.getPassword())
+                .when()
+                .get(environment.concat(Endpoint.login))
+                .then()
+                .statusCode(statusCode)
+                .body("message", CoreMatchers.startsWith(mensagem));
     }
 
 
