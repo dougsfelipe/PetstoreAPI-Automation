@@ -17,7 +17,6 @@
 *.class
 *.war
 *.ear
-*.jar
 
 # Testes
 /test-results/

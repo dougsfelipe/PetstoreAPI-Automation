@@ -46,7 +46,7 @@ public class PetStoreAPI {
     @ExtendWith(RetryExtension.class)
     @Test
     @Order(2)
-    @DisplayName("Search a User by ID")
+    @DisplayName("Search a User by Username")
     void test_search_user() {
         UserDTO userDTO = UserFactory.createUser();
         userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
@@ -54,6 +54,64 @@ public class PetStoreAPI {
         User.test_search_user(userDTO, HttpStatus.SC_OK, environment);
 
 
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(3)
+    @DisplayName("Update User by Username")
+    void test_upate_user() {
+        UserDTO userDTO = UserFactory.createUser();
+        userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
+        userDTO.setFirstName(userDTO.getFirstName() + " Atualizado");
+        User.test_update_user(userDTO, HttpStatus.SC_OK, environment);
+
+        User.test_search_user(userDTO, HttpStatus.SC_OK, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(4)
+    @DisplayName("Delete User by Username")
+    void test_delete_user() {
+
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(5)
+    @DisplayName("Search for a non existent user")
+    void test_search_for_non_existent_user() {
+
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(6)
+    @DisplayName("Login user")
+    void test_login_user() {
+        UserDTO userDTO = UserFactory.createUser();
+        userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
+
+        User.login_user(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(7)
+    @DisplayName("Logout user")
+    void test_logout_user() {
+        UserDTO userDTO = UserFactory.createUser();
+        userDTO.setId(register_user(userDTO, HttpStatus.SC_OK, Message.post_book_sucess, environment));
+
+        User.login_user(userDTO, HttpStatus.SC_OK, environment, Message.login_sucess);
+        User.logout(HttpStatus.SC_OK, environment, Message.logout_sucess);
 
     }
 

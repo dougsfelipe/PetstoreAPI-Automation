@@ -8,6 +8,7 @@ import org.APITest.util.Endpoint;
 import static org.hamcrest.CoreMatchers.is;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.startsWith;
 
 public class User {
 
@@ -48,6 +49,62 @@ public class User {
                 .body("password", is(user.getPassword()))
                 .body("phone", is(user.getPhone()))
                 .body("userStatus", is(user.getUserStatus()));
+
+    }
+
+    public static String test_update_user(UserDTO user, Integer statusCode, String environment){
+        Response response = given()
+                .body("{\n" +
+                        "  \"username\": \"" + user.getUsername() + "\",\n" +
+                        "  \"firstName\": \"" + user.getFirstName()  +"\",\n" +
+                        "  \"lastName\": \"" + user.getLastName() + "\",\n" +
+                        "  \"email\": \"" + user.getEmail() + "\",\n" +
+                        "  \"password\": \"" + user.getPassword() + "\",\n" +
+                        "  \"phone\": \"" + user.getPhone() + "\",\n" +
+                        "  \"userStatus\": " + user.getUserStatus() + "\n" +
+                        "}")
+                .log().all()
+                .pathParam("username", user.getUsername())
+                .contentType(ContentType.JSON)
+                .when()
+                .put(environment.concat(Endpoint.get_username)) // Ex: /api/v1/Books
+                .then()
+                .statusCode(statusCode)
+                .extract().response(); // Ou "_id", depende da resposta JSON real
+
+        String id = response.path("message").toString();
+        return id;
+    }
+
+    public static void login_user(UserDTO user, Integer statusCode, String environment, String mensagem){
+         given()
+                .queryParam("username", user.getUsername())
+                .queryParam("password", user.getPassword())
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(environment.concat(Endpoint.login)) // Ex: /api/v1/Books
+                .then()
+                .statusCode(statusCode)
+                 .body("message", startsWith(mensagem));
+
+
+
+    }
+
+
+    public static void logout(Integer statusCode, String environment, String message){
+        given()
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(environment.concat(Endpoint.logout)) // Ex: /api/v1/Books
+                .then()
+                .statusCode(statusCode)
+                .body("message", is(message));
+
+
+
 
     }
 

@@ -4,7 +4,8 @@ public class Endpoint {
 
     public static final String user = "/user";
     public static final String get_username = "/user/{username}";
-    public static final String books = "/Books";
+    public static final String login = "/user/login";
+    public static final String logout = "/user/logout";
     public static final String usuarios = "/usuarios";
     public static final String books_id = "/Books/{id}";
     public static final String produtos = "/produtos";
