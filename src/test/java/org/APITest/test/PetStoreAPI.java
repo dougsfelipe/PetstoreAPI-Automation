@@ -4,8 +4,10 @@ import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
 import org.APITest.controller.Pet;
 import org.APITest.controller.User;
+import org.APITest.factory.OrderFactory;
 import org.APITest.factory.PetFactory;
 import org.APITest.factory.UserFactory;
+import org.APITest.model.OrderDTO;
 import org.APITest.model.PetDTO;
 import org.APITest.model.UserDTO;
 import org.APITest.util.Environment;
@@ -15,6 +17,9 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+
+import static org.APITest.controller.Order.create_a_order;
 import static org.APITest.controller.Pet.register_pet;
 import static org.APITest.controller.User.register_user;
 
@@ -28,7 +33,7 @@ public class PetStoreAPI {
 
     @BeforeAll
     public static void definirAmbiente() {
-        environment = Environment.online;
+        environment = Environment.localhost;
         RestAssured.baseURI = environment;
     }
 
@@ -153,5 +158,65 @@ public class PetStoreAPI {
         Pet.search_pet_by_id(petDTO,HttpStatus.SC_OK, environment);
 
     }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(10)
+    @DisplayName("Update a Pet by ID using POST")
+    void test_update_by_id_using_post() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        petDTO.setName(petDTO.getName() + "_Att");
+        petDTO.setStatus("pending");
+        Pet.test_update_pet_by_id_using_post(petDTO,HttpStatus.SC_OK, environment);
+        Pet.search_pet_by_id(petDTO,HttpStatus.SC_OK, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(11)
+    @DisplayName("Finda Pet by Status")
+    void test_find_by_status() {
+        Pet.test_search_pet_by_status("available",  HttpStatus.SC_OK, environment);
+        Pet.test_search_pet_by_status("pending",  HttpStatus.SC_OK, environment);
+        Pet.test_search_pet_by_status("sold",  HttpStatus.SC_OK, environment);
+        Pet.test_invalid_status("error", HttpStatus.SC_NOT_FOUND, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(12)
+    @DisplayName("Find Pet by Tags")
+    void test_find_by_tags() {
+        Pet.test_search_pet_by_tags("purple", HttpStatus.SC_OK, environment);
+
+    }
+
+    @ExtendWith(RetryExtension.class)
+    @Test
+    @Order(13)
+    @DisplayName("Delete a pet")
+    void test_delete_a_pet() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        Pet.test_delete_pet(petDTO, HttpStatus.SC_OK,environment);
+        Pet.test_search_pet_not_found(petDTO, HttpStatus.SC_NOT_FOUND, environment);
+    }
+
+
+    @Test
+    @Order(13)
+    @DisplayName("Create a Order in Store")
+    void test_create_a_order() {
+        PetDTO petDTO = PetFactory.createPet();
+        petDTO.setId(register_pet(petDTO, HttpStatus.SC_OK, environment));
+        OrderDTO orderDTO = OrderFactory.createOrder(petDTO, 2 );
+        orderDTO.setId(create_a_order(orderDTO, HttpStatus.SC_OK, environment));
+
+    }
+
+
 
 }
